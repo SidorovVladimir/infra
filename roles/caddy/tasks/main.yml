@@ -20,7 +20,7 @@
 
 - name: Copy Caddy site configs
   copy:
-    src: environments/production/caddy/
+    src: '{{ playbook_dir }}/../files/caddy/'
     dest: /etc/caddy/sites/
   become: true
 
