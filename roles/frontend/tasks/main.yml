@@ -8,34 +8,19 @@
     label: '{{ item.key }}@{{ item.value.version }}'
   become: true
 
-- name: Install gh CLI
-  apt:
-    name: gh
-    state: present
-  become: true
-
-- name: Download frontend artifact
-  shell: |
-    rm -rf /tmp/{{ item.key }}
-    mkdir -p /tmp/{{ item.key }}
-    cd /tmp/{{ item.key }}
-    gh auth setup-git
-    gh run download \
-      --repo {{ item.value.artifact_repo }} \
-      --name {{ item.value.artifact_name }} \
-      --dir . \
-      --ref {{ item.value.version }}
-  args:
-    executable: /bin/bash
-  environment:
-    GH_TOKEN: '{{ github_token }}'
+- name: Download frontend from GitHub Release
+  get_url:
+    url: 'https://github.com/{{ item.value.artifact_repo }}/releases/download/{{ item.value.version }}/dist.zip'
+    dest: '/tmp/{{ item.key }}/dist.zip'
+    mode: '0644'
   loop: '{{ frontends | dict2items }}'
   become: true
 
-- name: Copy static files to server
-  copy:
-    src: '/tmp/{{ item.key }}/'
+- name: Extract frontend archive
+  unarchive:
+    src: '/tmp/{{ item.key }}/dist.zip'
     dest: '{{ static_root }}/{{ item.key }}/{{ item.value.version }}/'
+    remote_src: yes
   loop: '{{ frontends | dict2items }}'
   become: true
 

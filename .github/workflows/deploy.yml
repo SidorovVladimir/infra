@@ -21,4 +21,4 @@ jobs:
           ssh-keyscan -H 217.26.24.159 >> ~/.ssh/known_hosts
 
       - name: Run Ansible playbook
-        run: ansible-playbook playbooks/site.yml --extra-vars "github_token=${{ secrets.GH_PAT }}"
+        run: ansible-playbook playbooks/site.yml
