@@ -1,0 +1,7 @@
+all:
+  children:
+    webservers:
+      hosts:
+        diabloboom:
+          ansible_host: 217.26.24.159
+          ansible_user: diabloboom

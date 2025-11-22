@@ -1,0 +1,3 @@
+static_root: /srv
+docker_network: apps-net
+caddy_image: caddy:2.10-alpine

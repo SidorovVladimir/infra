@@ -1,0 +1,7 @@
+rss.idevspace.ru {
+    root * /srv/rss/current
+    file_server
+    log {
+        format json
+    }
+}

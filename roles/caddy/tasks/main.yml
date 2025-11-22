@@ -1,0 +1,54 @@
+- name: Create Docker network
+  community.docker.docker_network:
+    name: '{{ docker_network }}'
+  become: true
+
+- name: Create Caddy volumes
+  community.docker.docker_volume:
+    name: '{{ item }}'
+  loop:
+    - caddy_data
+    - caddy_config
+  become: true
+
+- name: Ensure Caddy config dir exists
+  file:
+    path: /etc/caddy/sites
+    state: directory
+    mode: '0755'
+  become: true
+
+- name: Copy Caddy site configs
+  copy:
+    src: environments/production/caddy/
+    dest: /etc/caddy/sites/
+  become: true
+
+- name: Create main Caddyfile
+  copy:
+    content: |
+      {
+          email v.sidorov29091988@gmail.com
+      }
+      import /etc/caddy/sites/*.caddy
+    dest: /etc/caddy/Caddyfile
+  become: true
+
+- name: Deploy Caddy container
+  community.docker.docker_container:
+    name: caddy
+    image: '{{ caddy_image }}'
+    state: started
+    restart_policy: always
+    ports:
+      - '80:80'
+      - '443:443'
+    volumes:
+      - '{{ static_root }}:{{ static_root }}:ro'
+      - /etc/caddy/Caddyfile:/etc/caddy/Caddyfile
+      - /etc/caddy/sites:/etc/caddy/sites:ro
+      - caddy_data/data
+      - caddy_config:/config
+    networks:
+      - name: '{{ docker_network }}'
+  become: true

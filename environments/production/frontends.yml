@@ -1,0 +1,6 @@
+frontends:
+  rss:
+    version: v1.0.0
+    domain: rss.idevspace.ru
+    artifact_repo: SidorovVladimir/RSS-agregator
+    artifact_name: dist

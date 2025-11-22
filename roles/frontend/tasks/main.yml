@@ -1,0 +1,57 @@
+- name: Ensure project directories exist
+  file:
+    path: '{{ static_root }}/{{ item.key }}/{{ item.value.version }}'
+    state: directory
+    mode: '0755'
+  loop: '{{ frontends | dict2items }}'
+  loop_control:
+    label: '{{ item.key }}@{{ item.value.version }}'
+
+- name: Install gh CLI
+  apt:
+    name: gh
+    state: present
+  become: true
+
+- name: Download frontend artifact
+  shell: |
+    rm -rf /tmp/{{ item.key }}
+    mkdir -p /tmp/{{ item.key }}
+    cd /tmp/{{ item.key }}
+    gh auth setup-git
+    gh run download \
+      --repo {{ item.value.artifact_repo }} \
+      --name {{ item.value.artifact_name }} \
+      --dir . \
+      --ref {{ item.value.version }}
+  args:
+    executable: /bin/bash
+  environment:
+    GH_TOKEN: '{{ github_token }}'
+  loop: '{{ frontends | dict2items }}'
+
+- name: Copy static files to server
+  copy:
+    src: '/tmp/{{ item.key }}/'
+    dest: '{{ static_root }}/{{ item.key }}/{{ item.value.version }}/'
+  loop: '{{ frontends | dict2items }}'
+
+- name: Update 'current' symlink
+  file:
+    src: '{{ static_root }}/{{ item.key }}/{{ item.value.version }}'
+    dest: '{{ static_root }}/{{ item.key }}/current'
+    state: link
+    force: yes
+  loop: '{{ frontends | dict2items }}'
+
+- name: Clean up old versions (keep last 5)
+  shell: |
+    set -euo pipefail
+    cd {{ static_root }}/{{ item.key }}
+    # Получаем все папки, начинающиеся с 'v', сортируем как версии, удаляем всё кроме последних 5
+    ls -1 | grep '^v' | sort -V | head -n -5 | xargs -r rm -rf
+  args:
+    executable: /bin/bash
+  loop: '{{ frontends | dict2items }}'
+  loop_control:
+    label: '{{ item.key }}'
