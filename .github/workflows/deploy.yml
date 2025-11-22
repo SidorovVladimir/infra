@@ -21,7 +21,6 @@ jobs:
           ssh-keyscan -H 217.26.24.159 >> ~/.ssh/known_hosts
 
       - name: Run Ansible playbook
-        run: ansible-playbook -i inventory/production.yml playbooks/site.yml
+        run: ansible-playbook playbooks/site.yml
         env:
-          ANSIBLE_HOST_KEY_CHECKING: False
           github_token: ${{ secrets.GH_PAT }}
