@@ -6,6 +6,7 @@
   loop: '{{ frontends | dict2items }}'
   loop_control:
     label: '{{ item.key }}@{{ item.value.version }}'
+  become: true
 
 - name: Install gh CLI
   apt:
@@ -29,12 +30,14 @@
   environment:
     GH_TOKEN: '{{ github_token }}'
   loop: '{{ frontends | dict2items }}'
+  become: true
 
 - name: Copy static files to server
   copy:
     src: '/tmp/{{ item.key }}/'
     dest: '{{ static_root }}/{{ item.key }}/{{ item.value.version }}/'
   loop: '{{ frontends | dict2items }}'
+  become: true
 
 - name: Update 'current' symlink
   file:
@@ -43,6 +46,7 @@
     state: link
     force: yes
   loop: '{{ frontends | dict2items }}'
+  become: true
 
 - name: Clean up old versions (keep last 5)
   shell: |
@@ -55,3 +59,4 @@
   loop: '{{ frontends | dict2items }}'
   loop_control:
     label: '{{ item.key }}'
+  become: true
