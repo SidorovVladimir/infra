@@ -1,8 +1,5 @@
 - name: Deploy production environment
   hosts: webservers
-  vars_files:
-    - environments/production/config.yml
-    - environments/production/frontends.yml
   roles:
     - caddy
     - frontend
