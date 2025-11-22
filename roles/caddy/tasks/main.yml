@@ -20,8 +20,10 @@
 
 - name: Copy Caddy site configs
   copy:
-    src: '{{ playbook_dir }}/../files/caddy/'
+    src: '{{ item }}'
     dest: /etc/caddy/sites/
+  loop:
+    - rss.caddy
   become: true
 
 - name: Create main Caddyfile
